@@ -1,0 +1,69 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+np.random.seed(42)
+
+data = {
+    'Age': np.random.randint(18, 60, 100),
+    'Salary': np.random.randint(25000, 100000, 100),
+    'Experience': np.random.randint(0, 20, 100),
+    'Department': np.random.choice(['IT', 'HR', 'Finance', 'Marketing'], 100)
+}
+
+df = pd.DataFrame(data)
+
+print(df.head())
+
+print("\nDataset Information")
+print(df.info())
+
+print("\nStatistical Summary")
+print(df.describe())
+
+print("\nMissing Values")
+print(df.isnull().sum())
+
+print("\nCorrelation Matrix")
+print(df[['Age', 'Salary', 'Experience']].corr())
+
+plt.figure(figsize=(6,4))
+sns.histplot(df['Salary'], bins=10, kde=True)
+plt.title('Salary Distribution')
+plt.show()
+
+plt.figure(figsize=(6,4))
+sns.boxplot(y=df['Salary'])
+plt.title('Salary Box Plot')
+plt.show()
+
+plt.figure(figsize=(6,4))
+sns.scatterplot(x='Experience', y='Salary', data=df)
+plt.title('Experience vs Salary')
+plt.show()
+
+plt.figure(figsize=(6,4))
+sns.heatmap(
+    df[['Age', 'Salary', 'Experience']].corr(),
+    annot=True,
+    cmap='coolwarm'
+)
+plt.title('Correlation Heatmap')
+plt.show()
+
+plt.figure(figsize=(6,4))
+df.groupby('Department')['Salary'].mean().plot(kind='bar')
+plt.title('Average Salary by Department')
+plt.ylabel('Salary')
+plt.show()
+
+department_salary = df.groupby('Department')['Salary'].mean()
+print("\nAverage Salary by Department")
+print(department_salary)
+
+highest_salary_dept = department_salary.idxmax()
+
+print("\nKey Insights")
+print(f"Department with highest average salary: {highest_salary_dept}")
+print(f"Average Salary: {department_salary.max():.2f}")
