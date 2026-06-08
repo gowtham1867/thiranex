@@ -1,0 +1,68 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay, roc_curve, roc_auc_score
+
+np.random.seed(42)
+
+data = {
+    'Study_Hours': np.random.randint(1, 10, 100),
+    'Attendance': np.random.randint(50, 100, 100),
+    'Assignments': np.random.randint(0, 10, 100)
+}
+
+df = pd.DataFrame(data)
+
+df['Pass'] = (
+    (df['Study_Hours'] * 5 +
+     df['Attendance'] * 0.5 +
+     df['Assignments'] * 3) > 65
+).astype(int)
+
+X = df[['Study_Hours', 'Attendance', 'Assignments']]
+y = df['Pass']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+y_prob = model.predict_proba(X_test)[:, 1]
+
+accuracy = accuracy_score(y_test, y_pred)
+
+print("Accuracy:", accuracy)
+
+cm = confusion_matrix(y_test, y_pred)
+
+disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+disp.plot()
+plt.title("Confusion Matrix")
+plt.show()
+
+fpr, tpr, thresholds = roc_curve(y_test, y_prob)
+auc = roc_auc_score(y_test, y_prob)
+
+plt.figure(figsize=(6, 4))
+plt.plot(fpr, tpr, label=f"AUC = {auc:.2f}")
+plt.plot([0, 1], [0, 1], linestyle='--')
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("ROC Curve")
+plt.legend()
+plt.show()
+
+new_student = pd.DataFrame({
+    'Study_Hours': [8],
+    'Attendance': [90],
+    'Assignments': [8]
+})
+
+prediction = model.predict(new_student)
+
+print("Predicted Result:", "Pass" if prediction[0] == 1 else "Fail")
